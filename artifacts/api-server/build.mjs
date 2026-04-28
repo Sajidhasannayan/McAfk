@@ -29,6 +29,14 @@ async function buildAll() {
     // - use path traversal to read files (e.g. @google-cloud/secret-manager loads sibling .proto files)
     external: [
       "*.node",
+      "mineflayer",
+      "minecraft-protocol",
+      "minecraft-data",
+      "prismarine-*",
+      "node-yggdrasil",
+      "node-rsa",
+      "node-fetch",
+      "yggdrasil",
       "sharp",
       "better-sqlite3",
       "sqlite3",

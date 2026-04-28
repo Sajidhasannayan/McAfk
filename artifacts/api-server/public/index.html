@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Minecraft AFK Bot</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9B%8F%EF%B8%8F%3C/text%3E%3C/svg%3E" />
+    <style>
+      :root {
+        --bg: #0f1115;
+        --panel: #161a22;
+        --panel-2: #1d222c;
+        --border: #262c38;
+        --text: #e6e9ef;
+        --muted: #8b94a7;
+        --accent: #5fd17a;
+        --warn: #f0b95b;
+        --error: #f06b6b;
+        --info: #6aa9ff;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+      .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 48px; }
+      header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
+      .logo { width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(135deg, #2d6b3a, #5fd17a);
+        display: grid; place-items: center; font-size: 22px; }
+      h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+      .subtitle { color: var(--muted); font-size: 14px; }
+      .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+      .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+      .card h2 { margin: 0 0 12px; font-size: 13px; font-weight: 600; color: var(--muted);
+        text-transform: uppercase; letter-spacing: 0.06em; }
+      .row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 14px;
+        border-bottom: 1px dashed var(--border); }
+      .row:last-child { border-bottom: none; }
+      .row .k { color: var(--muted); }
+      .row .v { font-variant-numeric: tabular-nums; text-align: right; word-break: break-all; }
+      .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
+        border-radius: 999px; font-size: 13px; font-weight: 600; background: var(--panel-2);
+        border: 1px solid var(--border); }
+      .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+      .dot.online { background: var(--accent); box-shadow: 0 0 0 4px rgba(95, 209, 122, 0.18); }
+      .dot.connecting, .dot.reconnecting { background: var(--warn); box-shadow: 0 0 0 4px rgba(240, 185, 91, 0.18); }
+      .dot.stopped, .dot.idle { background: var(--muted); }
+      .actions { margin-left: auto; display: flex; gap: 8px; }
+      button { background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+        padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+      button:hover { background: #242a36; }
+      .logs { background: #0b0d12; border: 1px solid var(--border); border-radius: 12px; padding: 0;
+        max-height: 360px; overflow: auto; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px; line-height: 1.6; }
+      .logline { padding: 4px 14px; border-bottom: 1px solid #11141a; display: grid;
+        grid-template-columns: 88px 56px 1fr; gap: 10px; }
+      .logline:last-child { border-bottom: none; }
+      .logline .ts { color: var(--muted); }
+      .logline .lv.info { color: var(--info); }
+      .logline .lv.warn { color: var(--warn); }
+      .logline .lv.error { color: var(--error); }
+      .footer { margin-top: 24px; color: var(--muted); font-size: 12px; }
+      a { color: var(--info); }
+      .bar { background: var(--panel-2); border-radius: 6px; height: 6px; overflow: hidden; margin-top: 6px; }
+      .bar > span { display: block; height: 100%; background: linear-gradient(90deg, #5fd17a, #6aa9ff); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="logo">⛏️</div>
+        <div>
+          <h1>Minecraft AFK Bot</h1>
+          <div class="subtitle">Status dashboard · ping <code>/health</code> from UptimeRobot</div>
+        </div>
+        <div class="actions">
+          <span class="pill"><span id="dot" class="dot"></span><span id="status">loading…</span></span>
+          <button id="restart">Restart bot</button>
+        </div>
+      </header>
+
+      <div class="grid">
+        <div class="card">
+          <h2>Connection</h2>
+          <div class="row"><span class="k">Server</span><span class="v" id="server">—</span></div>
+          <div class="row"><span class="k">Username</span><span class="v" id="username">—</span></div>
+          <div class="row"><span class="k">Dimension</span><span class="v" id="dimension">—</span></div>
+          <div class="row"><span class="k">Position</span><span class="v" id="position">—</span></div>
+          <div class="row"><span class="k">Health / Food</span><span class="v" id="health">—</span></div>
+        </div>
+
+        <div class="card">
+          <h2>Uptime</h2>
+          <div class="row"><span class="k">Process uptime</span><span class="v" id="uptime">—</span></div>
+          <div class="row"><span class="k">Connected for</span><span class="v" id="connected">—</span></div>
+          <div class="row"><span class="k">Reconnects</span><span class="v" id="reconnects">—</span></div>
+          <div class="row"><span class="k">Next reconnect</span><span class="v" id="next">—</span></div>
+          <div class="row"><span class="k">Last error</span><span class="v" id="error">—</span></div>
+        </div>
+
+        <div class="card">
+          <h2>Chunks</h2>
+          <div class="row"><span class="k">Loaded</span><span class="v" id="chunks">—</span></div>
+          <div class="row"><span class="k">Pruned (total)</span><span class="v" id="pruned">—</span></div>
+          <div class="row"><span class="k">Last prune</span><span class="v" id="lastprune">—</span></div>
+        </div>
+
+        <div class="card">
+          <h2>Memory</h2>
+          <div class="row"><span class="k">RSS</span><span class="v" id="rss">—</span></div>
+          <div class="row"><span class="k">Heap used</span><span class="v" id="heap">—</span></div>
+          <div class="bar"><span id="heapbar" style="width:0%"></span></div>
+          <div class="row"><span class="k">External</span><span class="v" id="external">—</span></div>
+          <div class="row"><span class="k">Forced GC runs</span><span class="v" id="gc">—</span></div>
+        </div>
+      </div>
+
+      <h2 style="margin: 24px 0 10px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em;">Recent activity</h2>
+      <div class="logs" id="logs"></div>
+
+      <div class="footer">
+        Endpoints: <a href="/health">/health</a> · <a href="/status">/status</a> · <a href="/healthz">/healthz</a>
+      </div>
+    </div>
+
+    <script>
+      function fmtDuration(ms) {
+        if (!ms || ms < 0) return "—";
+        const s = Math.floor(ms / 1000);
+        const d = Math.floor(s / 86400);
+        const h = Math.floor((s % 86400) / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        const sec = s % 60;
+        if (d) return `${d}d ${h}h ${m}m`;
+        if (h) return `${h}h ${m}m ${sec}s`;
+        if (m) return `${m}m ${sec}s`;
+        return `${sec}s`;
+      }
+      function fmtTime(ts) {
+        if (!ts) return "—";
+        const diff = ts - Date.now();
+        if (diff > 0) return `in ${fmtDuration(diff)}`;
+        return `${fmtDuration(Date.now() - ts)} ago`;
+      }
+      function setText(id, v) { document.getElementById(id).textContent = v; }
+
+      async function refresh() {
+        try {
+          const r = await fetch("/status", { cache: "no-store" });
+          const s = await r.json();
+          setText("status", s.status);
+          const dot = document.getElementById("dot");
+          dot.className = "dot " + s.status;
+
+          setText("server", `${s.serverHost}:${s.serverPort}`);
+          setText("username", s.username || "—");
+          setText("dimension", s.dimension || "—");
+          setText("position", s.position ? `${s.position.x}, ${s.position.y}, ${s.position.z}` : "—");
+          setText("health", s.health != null ? `${s.health.toFixed(1)} / ${s.food ?? "—"}` : "—");
+
+          setText("uptime", fmtDuration(Date.now() - s.startedAt));
+          setText("connected", s.connectedAt ? fmtDuration(Date.now() - s.connectedAt) : "—");
+          setText("reconnects", `${s.reconnectCount} (attempt ${s.reconnectAttempt})`);
+          setText("next", s.nextReconnectAt ? fmtTime(s.nextReconnectAt) : "—");
+          setText("error", s.lastError || "—");
+
+          setText("chunks", s.loadedChunks);
+          setText("pruned", s.prunedChunksTotal);
+          setText("lastprune", s.lastPruneAt ? fmtTime(s.lastPruneAt) : "—");
+
+          setText("rss", `${s.memory.rssMb} MB`);
+          setText("heap", `${s.memory.heapUsedMb} / ${s.memory.heapTotalMb} MB`);
+          const pct = s.memory.heapTotalMb ? Math.min(100, (s.memory.heapUsedMb / s.memory.heapTotalMb) * 100) : 0;
+          document.getElementById("heapbar").style.width = pct + "%";
+          setText("external", `${s.memory.externalMb} MB`);
+          setText("gc", `${s.memory.gcRuns}${s.memory.lastGcAt ? ` (last ${fmtTime(s.memory.lastGcAt)})` : ""}`);
+
+          const logsEl = document.getElementById("logs");
+          logsEl.innerHTML = "";
+          for (const l of s.logs.slice().reverse()) {
+            const t = new Date(l.ts).toLocaleTimeString();
+            const div = document.createElement("div");
+            div.className = "logline";
+            div.innerHTML = `<span class="ts">${t}</span><span class="lv ${l.level}">${l.level.toUpperCase()}</span><span>${l.message.replace(/[<>&]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]))}</span>`;
+            logsEl.appendChild(div);
+          }
+        } catch (e) {
+          setText("status", "unreachable");
+        }
+      }
+
+      document.getElementById("restart").addEventListener("click", async () => {
+        await fetch("/restart", { method: "POST" });
+        setTimeout(refresh, 600);
+      });
+
+      refresh();
+      setInterval(refresh, 3000);
+    </script>
+  </body>
+</html>
