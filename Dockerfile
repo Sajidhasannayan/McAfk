@@ -49,7 +49,7 @@ RUN pnpm --filter @workspace/api-server run build
 # Produce a self-contained production folder at /out
 # (deps installed without devDependencies, no workspace symlinks).
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    pnpm --filter @workspace/api-server deploy --prod /out
+    pnpm --filter @workspace/api-server deploy --prod --legacy /out
 
 # Move build artifacts into the deployed folder so the runtime stage
 # only needs to copy a single directory.
