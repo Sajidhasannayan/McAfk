@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "8sb5tkwjZPst_yohKOuXP"
+uri = "file://screenshots/dashboard.jpg"
+type = "image"
+title = "Minecraft AFK Bot — Dashboard"
