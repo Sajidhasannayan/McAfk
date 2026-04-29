@@ -113,6 +113,58 @@ function antiAfkTick(bot: Bot): void {
   }
 }
 
+interface FoodMeta {
+  foodPoints?: number;
+  saturation?: number;
+}
+
+function findBestFoodSlot(bot: Bot): { slotItemName: string; meta: FoodMeta } | null {
+  const reg = (bot as unknown as { registry?: { foods?: Record<number, FoodMeta>; foodsByName?: Record<string, FoodMeta> } }).registry;
+  const foodsById = reg?.foods ?? {};
+  const foodsByName = reg?.foodsByName ?? {};
+
+  const items = bot.inventory.items();
+  const candidates: Array<{ name: string; meta: FoodMeta }> = [];
+  for (const item of items) {
+    const byId = foodsById[item.type];
+    const byName = foodsByName[item.name];
+    const meta = byId ?? byName;
+    if (meta) candidates.push({ name: item.name, meta });
+  }
+  if (candidates.length === 0) return null;
+
+  const key = config.autoEatPriority === "foodPoints" ? "foodPoints" : "saturation";
+  candidates.sort((a, b) => (b.meta[key] ?? 0) - (a.meta[key] ?? 0));
+  const best = candidates[0]!;
+  return { slotItemName: best.name, meta: best.meta };
+}
+
+async function tryAutoEat(bot: Bot): Promise<void> {
+  if (!config.autoEatEnabled) return;
+  if (state.autoEat.eating) return;
+  if (bot.food == null || bot.food >= config.autoEatThreshold) return;
+
+  const pick = findBestFoodSlot(bot);
+  if (!pick) return;
+
+  const item = bot.inventory.items().find((i) => i.name === pick.slotItemName);
+  if (!item) return;
+
+  state.autoEat.eating = true;
+  try {
+    await bot.equip(item, "hand");
+    await bot.consume();
+    state.autoEat.timesEaten++;
+    state.autoEat.lastEatenAt = Date.now();
+    state.autoEat.lastFood = item.name;
+    log("info", `Ate ${item.name} (food now ${bot.food})`);
+  } catch (err) {
+    log("warn", `Auto-eat failed: ${(err as Error).message}`);
+  } finally {
+    state.autoEat.eating = false;
+  }
+}
+
 function sendNextChat(bot: Bot): void {
   if (config.chatMessages.length === 0) return;
   const msg = config.chatMessages[chatIndex % config.chatMessages.length]!;
@@ -201,6 +253,7 @@ function connect(): void {
   bot.on("health", () => {
     state.health = bot.health;
     state.food = bot.food;
+    void tryAutoEat(bot);
   });
 
   bot.on("move", () => {
@@ -238,7 +291,12 @@ export function startBot(): void {
   state.serverPort = config.port;
   state.username = config.username;
   state.startedAt = Date.now();
-  log("info", "Starting Minecraft AFK bot");
+  state.autoEat.enabled = config.autoEatEnabled;
+  state.autoEat.threshold = config.autoEatThreshold;
+  log(
+    "info",
+    `Starting Minecraft AFK bot (auto-eat ${config.autoEatEnabled ? `on, threshold ${config.autoEatThreshold}` : "off"})`,
+  );
   connect();
 }
 

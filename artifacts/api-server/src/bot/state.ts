@@ -33,6 +33,14 @@ export interface BotState {
     lastGcAt: number | null;
     gcRuns: number;
   };
+  autoEat: {
+    enabled: boolean;
+    threshold: number;
+    eating: boolean;
+    lastEatenAt: number | null;
+    lastFood: string | null;
+    timesEaten: number;
+  };
   logs: LogEntry[];
 }
 
@@ -64,6 +72,14 @@ export const state: BotState = {
     externalMb: 0,
     lastGcAt: null,
     gcRuns: 0,
+  },
+  autoEat: {
+    enabled: true,
+    threshold: 17,
+    eating: false,
+    lastEatenAt: null,
+    lastFood: null,
+    timesEaten: 0,
   },
   logs: [],
 };

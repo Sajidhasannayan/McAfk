@@ -104,6 +104,16 @@
         </div>
 
         <div class="card">
+          <h2>Auto-eat</h2>
+          <div class="row"><span class="k">Enabled</span><span class="v" id="eat_enabled">—</span></div>
+          <div class="row"><span class="k">Threshold</span><span class="v" id="eat_threshold">—</span></div>
+          <div class="row"><span class="k">Currently eating</span><span class="v" id="eat_eating">—</span></div>
+          <div class="row"><span class="k">Times eaten</span><span class="v" id="eat_times">—</span></div>
+          <div class="row"><span class="k">Last food</span><span class="v" id="eat_last">—</span></div>
+          <div class="row"><span class="k">Last eaten</span><span class="v" id="eat_when">—</span></div>
+        </div>
+
+        <div class="card">
           <h2>Memory</h2>
           <div class="row"><span class="k">RSS</span><span class="v" id="rss">—</span></div>
           <div class="row"><span class="k">Heap used</span><span class="v" id="heap">—</span></div>
@@ -165,6 +175,13 @@
           setText("chunks", s.loadedChunks);
           setText("pruned", s.prunedChunksTotal);
           setText("lastprune", s.lastPruneAt ? fmtTime(s.lastPruneAt) : "—");
+
+          setText("eat_enabled", s.autoEat.enabled ? "yes" : "no");
+          setText("eat_threshold", `${s.autoEat.threshold} / 20`);
+          setText("eat_eating", s.autoEat.eating ? "yes" : "no");
+          setText("eat_times", s.autoEat.timesEaten);
+          setText("eat_last", s.autoEat.lastFood || "—");
+          setText("eat_when", s.autoEat.lastEatenAt ? fmtTime(s.autoEat.lastEatenAt) : "—");
 
           setText("rss", `${s.memory.rssMb} MB`);
           setText("heap", `${s.memory.heapUsedMb} / ${s.memory.heapTotalMb} MB`);

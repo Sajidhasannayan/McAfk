@@ -14,6 +14,9 @@ export interface BotConfig {
   memoryReportIntervalMs: number;
   memoryGcThresholdMb: number;
   antiAfkIntervalMs: number;
+  autoEatEnabled: boolean;
+  autoEatThreshold: number;
+  autoEatPriority: "saturation" | "foodPoints";
 }
 
 function envStr(name: string, fallback: string): string {
@@ -51,5 +54,8 @@ export function loadBotConfig(): BotConfig {
     memoryReportIntervalMs: envInt("BOT_MEMORY_REPORT_INTERVAL_MS", 60_000),
     memoryGcThresholdMb: envInt("BOT_MEMORY_GC_THRESHOLD_MB", 200),
     antiAfkIntervalMs: envInt("BOT_ANTI_AFK_INTERVAL_MS", 20_000),
+    autoEatEnabled: envStr("BOT_AUTO_EAT", "true").toLowerCase() !== "false",
+    autoEatThreshold: envInt("BOT_AUTO_EAT_THRESHOLD", 17),
+    autoEatPriority: (envStr("BOT_AUTO_EAT_PRIORITY", "saturation") as "saturation" | "foodPoints"),
   };
 }

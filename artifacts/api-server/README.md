@@ -45,6 +45,9 @@ A modern Minecraft AFK bot for free Aternos servers (or any other Minecraft serv
 | `BOT_MEMORY_REPORT_INTERVAL_MS`  | `60000`     | Memory sampling cadence                                                  |
 | `BOT_MEMORY_GC_THRESHOLD_MB`     | `200`       | Force GC when heap exceeds this                                          |
 | `BOT_ANTI_AFK_INTERVAL_MS`       | `20000`     | Time between anti-AFK actions                                            |
+| `BOT_AUTO_EAT`                   | `true`      | Set `false` to disable auto-eat                                          |
+| `BOT_AUTO_EAT_THRESHOLD`         | `17`        | Eat when food bar drops to this (out of 20)                              |
+| `BOT_AUTO_EAT_PRIORITY`          | `saturation` | `saturation` or `foodPoints` — which stat to maximize when picking food |
 
 ## Deploy on Render
 
