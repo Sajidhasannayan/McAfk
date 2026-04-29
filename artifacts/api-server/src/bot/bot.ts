@@ -348,7 +348,7 @@ export function sendChatNow(message: string): boolean {
 }
 
 export function restartBot(): void {
-  log("info", "Restart requested");
+  log("info", "Restart requested — reloading config");
   if (currentBot) {
     try {
       currentBot.quit("restart");
@@ -361,7 +361,14 @@ export function restartBot(): void {
     clearTimeout(reconnectTimer);
     reconnectTimer = null;
   }
+  config = loadBotConfig();
+  state.serverHost = config.host;
+  state.serverPort = config.port;
+  state.username = config.username;
+  state.autoEat.enabled = config.autoEatEnabled;
+  state.autoEat.threshold = config.autoEatThreshold;
   state.reconnectAttempt = 0;
+  state.lastError = null;
   stopped = false;
   setTimeout(connect, 500);
 }

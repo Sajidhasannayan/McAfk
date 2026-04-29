@@ -3,6 +3,7 @@ import { state } from "../bot/state";
 import { restartBot, sendChatNow } from "../bot/bot";
 import { getChatMessages } from "../bot/chat";
 import { checkPassword, issueToken, tokenFromHeader, verifyToken } from "../bot/auth";
+import { readOverrides, writeOverrides } from "../bot/configStore";
 
 const router: IRouter = Router();
 
@@ -52,6 +53,55 @@ router.post("/chat/send", (req, res) => {
     return;
   }
   res.json({ ok: true });
+});
+
+router.get("/config", (_req, res) => {
+  const o = readOverrides();
+  res.json({
+    host: o.host ?? state.serverHost,
+    port: o.port ?? state.serverPort,
+    username: o.username ?? state.username,
+    overridden: {
+      host: o.host !== undefined,
+      port: o.port !== undefined,
+      username: o.username !== undefined,
+    },
+  });
+});
+
+router.post("/config", (req, res) => {
+  const token = tokenFromHeader(req.headers["authorization"]);
+  if (!verifyToken(token)) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  const body = req.body ?? {};
+  const host = typeof body.host === "string" ? body.host.trim() : "";
+  const portRaw = body.port;
+  const username = typeof body.username === "string" ? body.username.trim() : "";
+
+  if (!host || host.length > 253) {
+    res.status(400).json({ error: "Host is required (max 253 chars)" });
+    return;
+  }
+  const port = typeof portRaw === "number" ? portRaw : Number(portRaw);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    res.status(400).json({ error: "Port must be an integer between 1 and 65535" });
+    return;
+  }
+  if (!username || username.length > 16 || !/^[A-Za-z0-9_]+$/.test(username)) {
+    res.status(400).json({ error: "Username must be 1-16 chars (letters, digits, underscore)" });
+    return;
+  }
+
+  try {
+    writeOverrides({ host, port, username });
+  } catch (err) {
+    res.status(500).json({ error: `Failed to save: ${(err as Error).message}` });
+    return;
+  }
+  restartBot();
+  res.json({ ok: true, host, port, username });
 });
 
 router.post("/restart", (req, res) => {

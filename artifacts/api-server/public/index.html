@@ -115,6 +115,18 @@
       .login-card .actions { display: flex; gap: 8px; justify-content: space-between; align-items: center; }
       .login-card .hint { font-size: 12px; color: var(--muted); }
 
+      .settings-grid { display: grid; gap: 12px; grid-template-columns: 2fr 1fr 1fr; margin-bottom: 12px; }
+      .settings-grid label { display: flex; flex-direction: column; gap: 4px; }
+      .settings-grid label span { font-size: 12px; color: var(--muted); }
+      .settings-grid input { background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+        border-radius: 8px; padding: 9px 11px; font-size: 14px; font-family: inherit; }
+      .settings-grid input:focus { outline: none; border-color: var(--accent); }
+      .settings-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+      .cfg-msg { font-size: 13px; color: var(--muted); }
+      .cfg-msg.ok { color: var(--accent); }
+      .cfg-msg.err { color: var(--error); }
+      @media (max-width: 640px) { .settings-grid { grid-template-columns: 1fr; } }
+
       button.primary { background: var(--accent); color: #0b1110; border: none;
         padding: 11px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
       button.primary:hover { filter: brightness(1.05); }
@@ -212,6 +224,36 @@
             <div class="row"><span class="k">External</span><span class="v" id="external">—</span></div>
             <div class="row"><span class="k">Forced GC runs</span><span class="v" id="gc">—</span></div>
           </div>
+        </div>
+
+        <div id="settings-card" class="card" style="margin-top:16px; display:none;">
+          <h2>Server settings</h2>
+          <p style="margin:0 0 12px; color:var(--muted); font-size:13px;">
+            Saved to disk and used immediately. Overrides any <code>MC_HOST</code> / <code>MC_PORT</code> /
+            <code>MC_USERNAME</code> env vars, so you can deploy without setting any.
+          </p>
+          <div class="settings-grid">
+            <label><span>Host</span>
+              <input id="cfg-host" type="text" placeholder="example.aternos.me" autocomplete="off" />
+            </label>
+            <label><span>Port</span>
+              <input id="cfg-port" type="number" min="1" max="65535" placeholder="25565" />
+            </label>
+            <label><span>Username</span>
+              <input id="cfg-username" type="text" maxlength="16" placeholder="AFKBot" autocomplete="off" />
+            </label>
+          </div>
+          <div class="settings-actions">
+            <span class="cfg-msg" id="cfg-msg"></span>
+            <button class="primary" id="cfg-save">Save & reconnect</button>
+          </div>
+        </div>
+
+        <div id="settings-locked" class="card" style="margin-top:16px;">
+          <h2>Server settings</h2>
+          <p style="margin:0; color:var(--muted); font-size:13px;">
+            Sign in on the Chat tab to change the host, port, and username from here.
+          </p>
         </div>
 
         <div class="toolbar">
@@ -410,7 +452,51 @@
         document.getElementById("chat-login").style.display = loggedIn ? "none" : "block";
         document.getElementById("chat-app").style.display = loggedIn ? "block" : "none";
         document.getElementById("chat-readonly").style.display = loggedIn ? "none" : "block";
+        document.getElementById("settings-card").style.display = loggedIn ? "block" : "none";
+        document.getElementById("settings-locked").style.display = loggedIn ? "none" : "block";
+        if (loggedIn) loadConfig();
       }
+
+      async function loadConfig() {
+        try {
+          const r = await fetch("/config", { cache: "no-store" });
+          const j = await r.json();
+          const h = document.getElementById("cfg-host");
+          const p = document.getElementById("cfg-port");
+          const u = document.getElementById("cfg-username");
+          if (!h.dataset.dirty) h.value = j.host || "";
+          if (!p.dataset.dirty) p.value = j.port || "";
+          if (!u.dataset.dirty) u.value = j.username || "";
+        } catch {}
+      }
+      ["cfg-host","cfg-port","cfg-username"].forEach(id => {
+        document.getElementById(id).addEventListener("input", e => { e.target.dataset.dirty = "1"; });
+      });
+
+      document.getElementById("cfg-save").addEventListener("click", async () => {
+        const msg = document.getElementById("cfg-msg");
+        msg.className = "cfg-msg"; msg.textContent = "Saving…";
+        const body = {
+          host: document.getElementById("cfg-host").value.trim(),
+          port: Number(document.getElementById("cfg-port").value),
+          username: document.getElementById("cfg-username").value.trim(),
+        };
+        try {
+          const r = await fetch("/config", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() },
+            body: JSON.stringify(body),
+          });
+          if (r.status === 401) { setToken(null); applyAuthState(); return; }
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok) { msg.className = "cfg-msg err"; msg.textContent = j.error || "Failed to save"; return; }
+          msg.className = "cfg-msg ok"; msg.textContent = "Saved — bot is reconnecting…";
+          ["cfg-host","cfg-port","cfg-username"].forEach(id => delete document.getElementById(id).dataset.dirty);
+          setTimeout(() => { msg.textContent = ""; refreshStatus(); }, 1500);
+        } catch (e) {
+          msg.className = "cfg-msg err"; msg.textContent = "Network error";
+        }
+      });
 
       document.getElementById("login-btn").addEventListener("click", async () => {
         const pw = document.getElementById("pw").value;

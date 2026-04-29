@@ -1,3 +1,5 @@
+import { readOverrides } from "./configStore";
+
 export interface BotConfig {
   host: string;
   port: number;
@@ -38,10 +40,14 @@ export function loadBotConfig(): BotConfig {
     .map((m) => m.trim())
     .filter((m) => m.length > 0);
 
+  // UI overrides (saved via /config) take priority over env vars,
+  // so users can run the bot without setting any env vars on Render.
+  const overrides = readOverrides();
+
   return {
-    host: envStr("MC_HOST", "localhost"),
-    port: envInt("MC_PORT", 25565),
-    username: envStr("MC_USERNAME", "AFKBot"),
+    host: overrides.host ?? envStr("MC_HOST", "localhost"),
+    port: overrides.port ?? envInt("MC_PORT", 25565),
+    username: overrides.username ?? envStr("MC_USERNAME", "AFKBot"),
     version: envStr("MC_VERSION", "false") === "false" ? false : envStr("MC_VERSION", "1.20.4"),
     auth: envStr("MC_AUTH", "offline") as BotConfig["auth"],
     viewDistance: envStr("MC_VIEW_DISTANCE", "tiny") as BotConfig["viewDistance"],
