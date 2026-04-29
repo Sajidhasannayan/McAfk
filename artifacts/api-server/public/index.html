@@ -21,32 +21,50 @@
       * { box-sizing: border-box; }
       html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
         font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-      .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 48px; }
-      header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
+      .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 24px; }
+
+      /* Header */
+      .head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
       .logo { width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(135deg, #2d6b3a, #5fd17a);
         display: grid; place-items: center; font-size: 22px; }
-      h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
-      .subtitle { color: var(--muted); font-size: 14px; }
+      .head h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+      .subtitle { color: var(--muted); font-size: 13px; }
+
+      /* Hero status banner */
+      .hero { display: flex; align-items: center; gap: 16px; padding: 18px 20px;
+        background: linear-gradient(180deg, var(--panel), var(--panel-2));
+        border: 1px solid var(--border); border-radius: 14px; margin-bottom: 20px; flex-wrap: wrap; }
+      .hero .light { width: 14px; height: 14px; border-radius: 50%; background: var(--muted);
+        box-shadow: 0 0 0 4px rgba(139, 148, 167, 0.15); flex: 0 0 auto; }
+      .hero .light.online { background: var(--accent); box-shadow: 0 0 0 4px rgba(95, 209, 122, 0.2); }
+      .hero .light.connecting, .hero .light.reconnecting {
+        background: var(--warn); box-shadow: 0 0 0 4px rgba(240, 185, 91, 0.2); }
+      .hero .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+      .hero .value { font-size: 18px; font-weight: 600; }
+      .hero .col { display: flex; flex-direction: column; gap: 2px; min-width: 140px; }
+      .hero .col.grow { flex: 1; }
+
+      /* Tabs */
+      .tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+      .tab { background: none; border: none; color: var(--muted); padding: 10px 16px; font-size: 14px;
+        cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; font-weight: 500; }
+      .tab:hover { color: var(--text); }
+      .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+      /* Cards */
       .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
       .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
-      .card h2 { margin: 0 0 12px; font-size: 13px; font-weight: 600; color: var(--muted);
-        text-transform: uppercase; letter-spacing: 0.06em; }
+      .card h2 { margin: 0 0 12px; font-size: 12px; font-weight: 600; color: var(--muted);
+        text-transform: uppercase; letter-spacing: 0.08em; }
       .row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 14px;
         border-bottom: 1px dashed var(--border); }
       .row:last-child { border-bottom: none; }
       .row .k { color: var(--muted); }
       .row .v { font-variant-numeric: tabular-nums; text-align: right; word-break: break-all; }
-      .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
-        border-radius: 999px; font-size: 13px; font-weight: 600; background: var(--panel-2);
-        border: 1px solid var(--border); }
-      .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
-      .dot.online { background: var(--accent); box-shadow: 0 0 0 4px rgba(95, 209, 122, 0.18); }
-      .dot.connecting, .dot.reconnecting { background: var(--warn); box-shadow: 0 0 0 4px rgba(240, 185, 91, 0.18); }
-      .dot.stopped, .dot.idle { background: var(--muted); }
-      .actions { margin-left: auto; display: flex; gap: 8px; }
-      button { background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
-        padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
-      button:hover { background: #242a36; }
+      .bar { background: var(--panel-2); border-radius: 6px; height: 6px; overflow: hidden; margin-top: 6px; }
+      .bar > span { display: block; height: 100%; background: linear-gradient(90deg, #5fd17a, #6aa9ff); }
+
+      /* Activity logs */
       .logs { background: #0b0d12; border: 1px solid var(--border); border-radius: 12px; padding: 0;
         max-height: 360px; overflow: auto; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
         font-size: 12px; line-height: 1.6; }
@@ -57,81 +75,210 @@
       .logline .lv.info { color: var(--info); }
       .logline .lv.warn { color: var(--warn); }
       .logline .lv.error { color: var(--error); }
-      .footer { margin-top: 24px; color: var(--muted); font-size: 12px; }
-      a { color: var(--info); }
-      .bar { background: var(--panel-2); border-radius: 6px; height: 6px; overflow: hidden; margin-top: 6px; }
-      .bar > span { display: block; height: 100%; background: linear-gradient(90deg, #5fd17a, #6aa9ff); }
+      .section-title { margin: 24px 0 10px; font-size: 12px; color: var(--muted);
+        text-transform: uppercase; letter-spacing: 0.08em; }
+
+      /* Chat */
+      .chat-wrap { display: grid; grid-template-rows: 1fr auto; gap: 12px; }
+      .chat-box { background: #0b0d12; border: 1px solid var(--border); border-radius: 12px;
+        height: 480px; overflow-y: auto; padding: 8px 0; }
+      .chat-msg { padding: 6px 16px; display: grid; grid-template-columns: 78px 1fr; gap: 12px;
+        font-size: 13px; line-height: 1.55; border-bottom: 1px solid #11141a; }
+      .chat-msg:last-child { border-bottom: none; }
+      .chat-msg .when { color: var(--muted); font-variant-numeric: tabular-nums;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; padding-top: 2px; }
+      .chat-msg .body { word-wrap: break-word; }
+      .chat-msg .who { font-weight: 600; margin-right: 6px; }
+      .chat-msg.chat .who { color: var(--info); }
+      .chat-msg.whisper .who { color: #c08bff; }
+      .chat-msg.system .who { color: var(--muted); }
+      .chat-msg.self .who { color: var(--accent); }
+      .chat-empty { color: var(--muted); padding: 22px 18px; font-size: 13px; }
+
+      .composer { display: flex; gap: 8px; }
+      .composer input[type="text"] { flex: 1; background: var(--panel-2); color: var(--text);
+        border: 1px solid var(--border); border-radius: 8px; padding: 11px 14px; font-size: 14px;
+        font-family: inherit; }
+      .composer input[type="text"]:focus { outline: none; border-color: var(--accent); }
+      .composer input[type="text"]:disabled { opacity: 0.55; cursor: not-allowed; }
+
+      .login-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+        padding: 22px; max-width: 420px; margin: 18px auto; }
+      .login-card h3 { margin: 0 0 6px; font-size: 16px; }
+      .login-card p { margin: 0 0 14px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+      .login-card .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+      .login-card label { font-size: 12px; color: var(--muted); }
+      .login-card input { background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+        border-radius: 8px; padding: 11px 12px; font-size: 14px; font-family: inherit; }
+      .login-card input:focus { outline: none; border-color: var(--accent); }
+      .login-card .err { color: var(--error); font-size: 13px; min-height: 18px; margin-bottom: 8px; }
+      .login-card .actions { display: flex; gap: 8px; justify-content: space-between; align-items: center; }
+      .login-card .hint { font-size: 12px; color: var(--muted); }
+
+      button.primary { background: var(--accent); color: #0b1110; border: none;
+        padding: 11px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
+      button.primary:hover { filter: brightness(1.05); }
+      button.ghost { background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+        padding: 9px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+      button.ghost:hover { background: #242a36; }
+
+      .pane { display: none; }
+      .pane.active { display: block; }
+
+      .toolbar { display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+      .you { color: var(--muted); font-size: 13px; }
+
+      footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid var(--border);
+        display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+        color: var(--muted); font-size: 12px; }
+      footer a { color: var(--info); }
     </style>
   </head>
   <body>
     <div class="wrap">
-      <header>
+      <div class="head">
         <div class="logo">⛏️</div>
         <div>
           <h1>Minecraft AFK Bot</h1>
-          <div class="subtitle">Status dashboard · ping <code>/health</code> from UptimeRobot</div>
-        </div>
-        <div class="actions">
-          <span class="pill"><span id="dot" class="dot"></span><span id="status">loading…</span></span>
-          <button id="restart">Restart bot</button>
-        </div>
-      </header>
-
-      <div class="grid">
-        <div class="card">
-          <h2>Connection</h2>
-          <div class="row"><span class="k">Server</span><span class="v" id="server">—</span></div>
-          <div class="row"><span class="k">Username</span><span class="v" id="username">—</span></div>
-          <div class="row"><span class="k">Dimension</span><span class="v" id="dimension">—</span></div>
-          <div class="row"><span class="k">Position</span><span class="v" id="position">—</span></div>
-          <div class="row"><span class="k">Health / Food</span><span class="v" id="health">—</span></div>
-        </div>
-
-        <div class="card">
-          <h2>Uptime</h2>
-          <div class="row"><span class="k">Process uptime</span><span class="v" id="uptime">—</span></div>
-          <div class="row"><span class="k">Connected for</span><span class="v" id="connected">—</span></div>
-          <div class="row"><span class="k">Reconnects</span><span class="v" id="reconnects">—</span></div>
-          <div class="row"><span class="k">Next reconnect</span><span class="v" id="next">—</span></div>
-          <div class="row"><span class="k">Last error</span><span class="v" id="error">—</span></div>
-        </div>
-
-        <div class="card">
-          <h2>Chunks</h2>
-          <div class="row"><span class="k">Loaded</span><span class="v" id="chunks">—</span></div>
-          <div class="row"><span class="k">Pruned (total)</span><span class="v" id="pruned">—</span></div>
-          <div class="row"><span class="k">Last prune</span><span class="v" id="lastprune">—</span></div>
-        </div>
-
-        <div class="card">
-          <h2>Auto-eat</h2>
-          <div class="row"><span class="k">Enabled</span><span class="v" id="eat_enabled">—</span></div>
-          <div class="row"><span class="k">Threshold</span><span class="v" id="eat_threshold">—</span></div>
-          <div class="row"><span class="k">Currently eating</span><span class="v" id="eat_eating">—</span></div>
-          <div class="row"><span class="k">Times eaten</span><span class="v" id="eat_times">—</span></div>
-          <div class="row"><span class="k">Last food</span><span class="v" id="eat_last">—</span></div>
-          <div class="row"><span class="k">Last eaten</span><span class="v" id="eat_when">—</span></div>
-        </div>
-
-        <div class="card">
-          <h2>Memory</h2>
-          <div class="row"><span class="k">RSS</span><span class="v" id="rss">—</span></div>
-          <div class="row"><span class="k">Heap used</span><span class="v" id="heap">—</span></div>
-          <div class="bar"><span id="heapbar" style="width:0%"></span></div>
-          <div class="row"><span class="k">External</span><span class="v" id="external">—</span></div>
-          <div class="row"><span class="k">Forced GC runs</span><span class="v" id="gc">—</span></div>
+          <div class="subtitle">Live status · in-game chat · keep your Aternos server warm</div>
         </div>
       </div>
 
-      <h2 style="margin: 24px 0 10px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em;">Recent activity</h2>
-      <div class="logs" id="logs"></div>
-
-      <div class="footer">
-        Endpoints: <a href="/health">/health</a> · <a href="/status">/status</a> · <a href="/healthz">/healthz</a>
+      <div class="hero">
+        <div class="light" id="hero-light"></div>
+        <div class="col">
+          <div class="label">Status</div>
+          <div class="value" id="hero-status">…</div>
+        </div>
+        <div class="col grow">
+          <div class="label">Server</div>
+          <div class="value" id="hero-server">—</div>
+        </div>
+        <div class="col">
+          <div class="label" id="hero-uptime-label">Connected for</div>
+          <div class="value" id="hero-uptime">—</div>
+        </div>
       </div>
+
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="status" role="tab">Status</button>
+        <button class="tab" data-tab="chat" role="tab">Chat</button>
+      </div>
+
+      <!-- STATUS PANE -->
+      <div class="pane active" id="pane-status">
+        <div class="grid">
+          <div class="card">
+            <h2>Connection</h2>
+            <div class="row"><span class="k">Server</span><span class="v" id="server">—</span></div>
+            <div class="row"><span class="k">Username</span><span class="v" id="username">—</span></div>
+            <div class="row"><span class="k">Dimension</span><span class="v" id="dimension">—</span></div>
+            <div class="row"><span class="k">Position</span><span class="v" id="position">—</span></div>
+            <div class="row"><span class="k">Health / Food</span><span class="v" id="health">—</span></div>
+          </div>
+
+          <div class="card">
+            <h2>Uptime</h2>
+            <div class="row"><span class="k">Process uptime</span><span class="v" id="uptime">—</span></div>
+            <div class="row"><span class="k">Connected for</span><span class="v" id="connected">—</span></div>
+            <div class="row"><span class="k">Reconnects</span><span class="v" id="reconnects">—</span></div>
+            <div class="row"><span class="k">Next reconnect</span><span class="v" id="next">—</span></div>
+            <div class="row"><span class="k">Last error</span><span class="v" id="error">—</span></div>
+          </div>
+
+          <div class="card">
+            <h2>Chunks</h2>
+            <div class="row"><span class="k">Loaded</span><span class="v" id="chunks">—</span></div>
+            <div class="row"><span class="k">Pruned (total)</span><span class="v" id="pruned">—</span></div>
+            <div class="row"><span class="k">Last prune</span><span class="v" id="lastprune">—</span></div>
+          </div>
+
+          <div class="card">
+            <h2>Auto-eat</h2>
+            <div class="row"><span class="k">Enabled</span><span class="v" id="eat_enabled">—</span></div>
+            <div class="row"><span class="k">Threshold</span><span class="v" id="eat_threshold">—</span></div>
+            <div class="row"><span class="k">Currently eating</span><span class="v" id="eat_eating">—</span></div>
+            <div class="row"><span class="k">Times eaten</span><span class="v" id="eat_times">—</span></div>
+            <div class="row"><span class="k">Last food</span><span class="v" id="eat_last">—</span></div>
+            <div class="row"><span class="k">Last eaten</span><span class="v" id="eat_when">—</span></div>
+          </div>
+
+          <div class="card">
+            <h2>Memory</h2>
+            <div class="row"><span class="k">RSS</span><span class="v" id="rss">—</span></div>
+            <div class="row"><span class="k">Heap used</span><span class="v" id="heap">—</span></div>
+            <div class="bar"><span id="heapbar" style="width:0%"></span></div>
+            <div class="row"><span class="k">External</span><span class="v" id="external">—</span></div>
+            <div class="row"><span class="k">Forced GC runs</span><span class="v" id="gc">—</span></div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <h2 class="section-title" style="margin:24px 0 10px;">Recent activity</h2>
+          <button class="ghost" id="restart" title="Requires login on the Chat tab">Restart bot</button>
+        </div>
+        <div class="logs" id="logs"></div>
+      </div>
+
+      <!-- CHAT PANE -->
+      <div class="pane" id="pane-chat">
+        <div id="chat-login" style="display:none;">
+          <div class="login-card">
+            <h3>Sign in to send chat</h3>
+            <p>Anyone can read the chat below. To send messages into the Minecraft server, enter the bot password.</p>
+            <div class="field">
+              <label for="pw">Password</label>
+              <input id="pw" type="password" autocomplete="current-password" placeholder="••••••••" />
+            </div>
+            <div class="err" id="login-err"></div>
+            <div class="actions">
+              <span class="hint">Token stays in this browser only.</span>
+              <button class="primary" id="login-btn">Sign in</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="chat-app" style="display:none;">
+          <div class="toolbar">
+            <span class="you" id="chat-you">Signed in</span>
+            <button class="ghost" id="logout-btn">Sign out</button>
+          </div>
+          <div class="chat-wrap">
+            <div class="chat-box" id="chat-box">
+              <div class="chat-empty">No messages yet.</div>
+            </div>
+            <form class="composer" id="composer">
+              <input id="chat-input" type="text" maxlength="256" autocomplete="off"
+                placeholder="Type a message to send in-game…" />
+              <button class="primary" id="send-btn" type="submit">Send</button>
+            </form>
+          </div>
+        </div>
+
+        <div id="chat-readonly">
+          <div class="chat-wrap">
+            <div class="chat-box" id="chat-box-public">
+              <div class="chat-empty">No messages yet.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div>© <span id="year"></span> sajidmogged. All rights reserved.</div>
+        <div>
+          Endpoints: <a href="/health">/health</a> · <a href="/status">/status</a> ·
+          <a href="/chat/messages">/chat/messages</a>
+        </div>
+      </footer>
     </div>
 
     <script>
+      const TOKEN_KEY = "afkbot_chat_token";
+      function getToken() { return localStorage.getItem(TOKEN_KEY); }
+      function setToken(t) { if (t) localStorage.setItem(TOKEN_KEY, t); else localStorage.removeItem(TOKEN_KEY); }
+
       function fmtDuration(ms) {
         if (!ms || ms < 0) return "—";
         const s = Math.floor(ms / 1000);
@@ -150,15 +297,38 @@
         if (diff > 0) return `in ${fmtDuration(diff)}`;
         return `${fmtDuration(Date.now() - ts)} ago`;
       }
-      function setText(id, v) { document.getElementById(id).textContent = v; }
+      function setText(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
+      function escapeHtml(s) { return s.replace(/[<>&"']/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;","\"":"&quot;","'":"&#39;"})[c]); }
 
-      async function refresh() {
+      // Tabs
+      const tabs = document.querySelectorAll(".tab");
+      tabs.forEach(t => t.addEventListener("click", () => {
+        tabs.forEach(x => x.classList.toggle("active", x === t));
+        document.querySelectorAll(".pane").forEach(p =>
+          p.classList.toggle("active", p.id === "pane-" + t.dataset.tab));
+        if (t.dataset.tab === "chat") refreshChat();
+      }));
+
+      // Status
+      async function refreshStatus() {
         try {
           const r = await fetch("/status", { cache: "no-store" });
           const s = await r.json();
-          setText("status", s.status);
-          const dot = document.getElementById("dot");
-          dot.className = "dot " + s.status;
+
+          const onlineNow = s.status === "online";
+          document.getElementById("hero-light").className = "light " + s.status;
+          setText("hero-status", onlineNow ? "Online" :
+            s.status === "connecting" ? "Connecting…" :
+            s.status === "reconnecting" ? "Reconnecting…" :
+            s.status === "stopped" ? "Stopped" : "Offline");
+          setText("hero-server", `${s.serverHost}:${s.serverPort}`);
+          if (onlineNow && s.connectedAt) {
+            setText("hero-uptime-label", "Connected for");
+            setText("hero-uptime", fmtDuration(Date.now() - s.connectedAt));
+          } else {
+            setText("hero-uptime-label", s.disconnectedAt ? "Last seen" : "Connected for");
+            setText("hero-uptime", s.disconnectedAt ? fmtTime(s.disconnectedAt) : "—");
+          }
 
           setText("server", `${s.serverHost}:${s.serverPort}`);
           setText("username", s.username || "—");
@@ -196,21 +366,129 @@
             const t = new Date(l.ts).toLocaleTimeString();
             const div = document.createElement("div");
             div.className = "logline";
-            div.innerHTML = `<span class="ts">${t}</span><span class="lv ${l.level}">${l.level.toUpperCase()}</span><span>${l.message.replace(/[<>&]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]))}</span>`;
+            div.innerHTML = `<span class="ts">${t}</span><span class="lv ${l.level}">${l.level.toUpperCase()}</span><span>${escapeHtml(l.message)}</span>`;
             logsEl.appendChild(div);
           }
         } catch (e) {
-          setText("status", "unreachable");
+          setText("hero-status", "Unreachable");
         }
       }
 
-      document.getElementById("restart").addEventListener("click", async () => {
-        await fetch("/restart", { method: "POST" });
-        setTimeout(refresh, 600);
+      // Chat
+      function renderChatInto(boxEl, messages) {
+        boxEl.innerHTML = "";
+        if (!messages || messages.length === 0) {
+          boxEl.innerHTML = '<div class="chat-empty">No messages yet.</div>';
+          return;
+        }
+        for (const m of messages) {
+          const t = new Date(m.ts).toLocaleTimeString();
+          const div = document.createElement("div");
+          div.className = "chat-msg " + (m.type || "system");
+          const who = m.sender ? `<span class="who">${escapeHtml(m.sender)}:</span>` : "";
+          div.innerHTML = `<span class="when">${t}</span><span class="body">${who}${escapeHtml(m.text)}</span>`;
+          boxEl.appendChild(div);
+        }
+        boxEl.scrollTop = boxEl.scrollHeight;
+      }
+
+      async function refreshChat() {
+        try {
+          const r = await fetch("/chat/messages", { cache: "no-store" });
+          const j = await r.json();
+          const loggedIn = !!getToken();
+          if (loggedIn) {
+            renderChatInto(document.getElementById("chat-box"), j.messages);
+          } else {
+            renderChatInto(document.getElementById("chat-box-public"), j.messages);
+          }
+        } catch {}
+      }
+
+      function applyAuthState() {
+        const loggedIn = !!getToken();
+        document.getElementById("chat-login").style.display = loggedIn ? "none" : "block";
+        document.getElementById("chat-app").style.display = loggedIn ? "block" : "none";
+        document.getElementById("chat-readonly").style.display = loggedIn ? "none" : "block";
+      }
+
+      document.getElementById("login-btn").addEventListener("click", async () => {
+        const pw = document.getElementById("pw").value;
+        const errEl = document.getElementById("login-err");
+        errEl.textContent = "";
+        try {
+          const r = await fetch("/chat/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: pw }),
+          });
+          if (!r.ok) {
+            const j = await r.json().catch(() => ({}));
+            errEl.textContent = j.error || "Sign in failed";
+            return;
+          }
+          const j = await r.json();
+          setToken(j.token);
+          document.getElementById("pw").value = "";
+          applyAuthState();
+          refreshChat();
+        } catch {
+          errEl.textContent = "Network error";
+        }
       });
 
-      refresh();
-      setInterval(refresh, 3000);
+      document.getElementById("pw").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") document.getElementById("login-btn").click();
+      });
+
+      document.getElementById("logout-btn").addEventListener("click", () => {
+        setToken(null); applyAuthState(); refreshChat();
+      });
+
+      document.getElementById("composer").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const input = document.getElementById("chat-input");
+        const message = input.value.trim();
+        if (!message) return;
+        const btn = document.getElementById("send-btn");
+        btn.disabled = true;
+        try {
+          const r = await fetch("/chat/send", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + getToken(),
+            },
+            body: JSON.stringify({ message }),
+          });
+          if (r.status === 401) { setToken(null); applyAuthState(); return; }
+          if (!r.ok) {
+            const j = await r.json().catch(() => ({}));
+            alert(j.error || "Failed to send");
+            return;
+          }
+          input.value = "";
+          refreshChat();
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      document.getElementById("restart").addEventListener("click", async () => {
+        const token = getToken();
+        if (!token) { alert("Sign in on the Chat tab first."); return; }
+        const r = await fetch("/restart", { method: "POST", headers: { "Authorization": "Bearer " + token } });
+        if (r.status === 401) { setToken(null); applyAuthState(); alert("Session expired — sign in again."); return; }
+        setTimeout(refreshStatus, 600);
+      });
+
+      document.getElementById("year").textContent = new Date().getFullYear();
+
+      applyAuthState();
+      refreshStatus();
+      refreshChat();
+      setInterval(refreshStatus, 3000);
+      setInterval(refreshChat, 3000);
     </script>
   </body>
 </html>

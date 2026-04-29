@@ -2,6 +2,7 @@ import mineflayer, { type Bot } from "mineflayer";
 import { logger } from "../lib/logger";
 import { type BotConfig, loadBotConfig } from "./config";
 import { pushLog, state } from "./state";
+import { pushChat } from "./chat";
 
 let currentBot: Bot | null = null;
 let reconnectTimer: NodeJS.Timeout | null = null;
@@ -256,6 +257,20 @@ function connect(): void {
     void tryAutoEat(bot);
   });
 
+  bot.on("chat", (username, message) => {
+    if (username === bot.username) return;
+    pushChat({ ts: Date.now(), sender: username, text: message, type: "chat" });
+  });
+
+  bot.on("whisper", (username, message) => {
+    pushChat({ ts: Date.now(), sender: username, text: message, type: "whisper" });
+  });
+
+  bot.on("messagestr", (msg, position) => {
+    if (position === "chat") return;
+    pushChat({ ts: Date.now(), sender: "server", text: msg, type: "system" });
+  });
+
   bot.on("move", () => {
     const p = bot.entity?.position;
     if (p) state.position = { x: +p.x.toFixed(1), y: +p.y.toFixed(1), z: +p.z.toFixed(1) };
@@ -317,6 +332,19 @@ export function stopBot(): void {
     currentBot = null;
   }
   log("info", "Bot stopped");
+}
+
+export function sendChatNow(message: string): boolean {
+  if (!currentBot || state.status !== "online") return false;
+  try {
+    currentBot.chat(message);
+    pushChat({ ts: Date.now(), sender: state.username || "bot", text: message, type: "self" });
+    log("info", `Chat (manual): ${message}`);
+    return true;
+  } catch (err) {
+    log("warn", `Manual chat failed: ${(err as Error).message}`);
+    return false;
+  }
 }
 
 export function restartBot(): void {

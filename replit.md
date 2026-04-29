@@ -14,8 +14,16 @@ Minecraft AFK bot for free Aternos servers, with a built-in status webpage so it
   - **Chunk loading control** via mineflayer `viewDistance: "tiny"` (default).
   - **Periodic chunk pruning** unloads far chunks every 30s (configurable radius).
   - **Memory monitor** samples RSS/heap and triggers manual GC (`--expose-gc`) past a configurable threshold.
-- **Status dashboard** at `/` with live state, recent activity logs, and a Restart button.
+- **Auto-eat**: scans `bot.registry.foods`, equips and consumes the best food (saturation/foodPoints) when food drops below threshold (default 17/20).
+- **Public dashboard** at `/` with prominent online/offline hero (server name + live join uptime), Status tab, and password-gated Chat tab for sending in-game messages and viewing chat. Footer credits "© sajidmogged".
 - **Health endpoint** at `/health` for UptimeRobot.
+
+## Auth & chat
+
+- `POST /chat/login` with `{password}` returns an HMAC-SHA256 signed token (30-day TTL). Default password is `4pkj9!uwoj69ttsajidobhai7!` and can be overridden with `BOT_CHAT_PASSWORD`. Tokens are signed with `SESSION_SECRET`.
+- `POST /chat/send` (Bearer token) sends a chat message via the bot.
+- `GET /chat/messages` is public and returns the last 200 messages (chat / whisper / system / self).
+- `POST /restart` is now token-protected.
 
 ## Project structure
 
