@@ -19,7 +19,18 @@ const server = app.listen(port, (err) => {
   logger.info({ port }, "Status server listening");
 });
 
-startBot();
+try {
+  startBot();
+} catch (err) {
+  logger.error({ err }, "Failed to start bot — HTTP server will continue running");
+}
+
+process.on("uncaughtException", (err) => {
+  logger.error({ err }, "uncaughtException");
+});
+process.on("unhandledRejection", (reason) => {
+  logger.error({ reason }, "unhandledRejection");
+});
 
 function shutdown(signal: string): void {
   logger.info({ signal }, "Shutting down");
