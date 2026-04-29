@@ -300,14 +300,23 @@ function connect(): void {
 }
 
 export function startBot(): void {
+  // Idempotent: ignore if already running or trying to connect.
+  if (
+    state.status === "online" ||
+    state.status === "connecting" ||
+    state.status === "reconnecting"
+  ) {
+    return;
+  }
   config = loadBotConfig();
   stopped = false;
   state.serverHost = config.host;
   state.serverPort = config.port;
   state.username = config.username;
-  state.startedAt = Date.now();
   state.autoEat.enabled = config.autoEatEnabled;
   state.autoEat.threshold = config.autoEatThreshold;
+  state.reconnectAttempt = 0;
+  state.lastError = null;
   log(
     "info",
     `Starting Minecraft AFK bot (auto-eat ${config.autoEatEnabled ? `on, threshold ${config.autoEatThreshold}` : "off"})`,
@@ -316,8 +325,10 @@ export function startBot(): void {
 }
 
 export function stopBot(): void {
+  if (state.status === "stopped") return;
   stopped = true;
   state.status = "stopped";
+  state.nextReconnectAt = null;
   if (reconnectTimer) {
     clearTimeout(reconnectTimer);
     reconnectTimer = null;
@@ -332,6 +343,10 @@ export function stopBot(): void {
     currentBot = null;
   }
   log("info", "Bot stopped");
+}
+
+export function isBotStopped(): boolean {
+  return stopped;
 }
 
 export function sendChatNow(message: string): boolean {

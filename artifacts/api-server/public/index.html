@@ -115,6 +115,20 @@
       .login-card .actions { display: flex; gap: 8px; justify-content: space-between; align-items: center; }
       .login-card .hint { font-size: 12px; color: var(--muted); }
 
+      .bot-controls { display: flex; gap: 8px; align-items: center; }
+      .power { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border);
+        background: var(--panel-2); color: var(--text); padding: 9px 16px; border-radius: 8px;
+        cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.15s; }
+      .power .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+      .power.run { background: rgba(95, 209, 122, 0.12); border-color: rgba(95, 209, 122, 0.45); color: var(--accent); }
+      .power.run .dot { background: var(--accent); box-shadow: 0 0 6px rgba(95, 209, 122, 0.7); }
+      .power.run:hover { background: rgba(95, 209, 122, 0.2); }
+      .power.stop { background: rgba(240, 107, 107, 0.12); border-color: rgba(240, 107, 107, 0.45); color: var(--error); }
+      .power.stop .dot { background: var(--error); box-shadow: 0 0 6px rgba(240, 107, 107, 0.7); }
+      .power.stop:hover { background: rgba(240, 107, 107, 0.2); }
+      .power.off { opacity: 0.6; }
+      .power:disabled { cursor: not-allowed; opacity: 0.5; }
+
       .settings-grid { display: grid; gap: 12px; grid-template-columns: 2fr 1fr 1fr; margin-bottom: 12px; }
       .settings-grid label { display: flex; flex-direction: column; gap: 4px; }
       .settings-grid label span { font-size: 12px; color: var(--muted); }
@@ -258,7 +272,12 @@
 
         <div class="toolbar">
           <h2 class="section-title" style="margin:24px 0 10px;">Recent activity</h2>
-          <button class="ghost" id="restart" title="Requires login on the Chat tab">Restart bot</button>
+          <div class="bot-controls">
+            <button class="power off" id="bot-power" title="Sign in on the Chat tab to use">
+              <span class="dot"></span><span class="lbl">…</span>
+            </button>
+            <button class="ghost" id="bot-restart" title="Restart with the latest config">Restart</button>
+          </div>
         </div>
         <div class="logs" id="logs"></div>
       </div>
@@ -364,6 +383,7 @@
             s.status === "reconnecting" ? "Reconnecting…" :
             s.status === "stopped" ? "Stopped" : "Offline");
           setText("hero-server", `${s.serverHost}:${s.serverPort}`);
+          updatePowerButton(s.status);
           if (onlineNow && s.connectedAt) {
             setText("hero-uptime-label", "Connected for");
             setText("hero-uptime", fmtDuration(Date.now() - s.connectedAt));
@@ -560,13 +580,48 @@
         }
       });
 
-      document.getElementById("restart").addEventListener("click", async () => {
+      function updatePowerButton(status) {
+        const btn = document.getElementById("bot-power");
+        const lbl = btn.querySelector(".lbl");
+        const restart = document.getElementById("bot-restart");
+        const loggedIn = !!getToken();
+        const isStopped = status === "stopped";
+        btn.classList.remove("run", "stop", "off");
+        if (!loggedIn) {
+          btn.classList.add("off");
+          lbl.textContent = isStopped ? "Stopped" : "Running";
+          btn.disabled = true;
+          restart.disabled = true;
+          btn.title = "Sign in on the Chat tab to use";
+          restart.title = "Sign in on the Chat tab to use";
+        } else if (isStopped) {
+          btn.classList.add("run");
+          lbl.textContent = "Start";
+          btn.disabled = false;
+          restart.disabled = true;
+          btn.title = "Start the bot";
+        } else {
+          btn.classList.add("stop");
+          lbl.textContent = "Stop";
+          btn.disabled = false;
+          restart.disabled = false;
+          btn.title = "Stop the bot";
+          restart.title = "Restart with the latest config";
+        }
+      }
+
+      async function powerAction(path) {
         const token = getToken();
         if (!token) { alert("Sign in on the Chat tab first."); return; }
-        const r = await fetch("/restart", { method: "POST", headers: { "Authorization": "Bearer " + token } });
+        const r = await fetch(path, { method: "POST", headers: { "Authorization": "Bearer " + token } });
         if (r.status === 401) { setToken(null); applyAuthState(); alert("Session expired — sign in again."); return; }
         setTimeout(refreshStatus, 600);
+      }
+      document.getElementById("bot-power").addEventListener("click", () => {
+        const isStopped = document.getElementById("hero-status").textContent.toLowerCase().startsWith("stopped");
+        powerAction(isStopped ? "/start" : "/stop");
       });
+      document.getElementById("bot-restart").addEventListener("click", () => powerAction("/restart"));
 
       document.getElementById("year").textContent = new Date().getFullYear();
 

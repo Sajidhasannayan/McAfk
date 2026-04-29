@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { state } from "../bot/state";
-import { restartBot, sendChatNow } from "../bot/bot";
+import { restartBot, sendChatNow, startBot, stopBot } from "../bot/bot";
 import { getChatMessages } from "../bot/chat";
 import { checkPassword, issueToken, tokenFromHeader, verifyToken } from "../bot/auth";
 import { readOverrides, writeOverrides } from "../bot/configStore";
@@ -102,6 +102,26 @@ router.post("/config", (req, res) => {
   }
   restartBot();
   res.json({ ok: true, host, port, username });
+});
+
+router.post("/start", (req, res) => {
+  const token = tokenFromHeader(req.headers["authorization"]);
+  if (!verifyToken(token)) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  startBot();
+  res.json({ ok: true, status: state.status });
+});
+
+router.post("/stop", (req, res) => {
+  const token = tokenFromHeader(req.headers["authorization"]);
+  if (!verifyToken(token)) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  stopBot();
+  res.json({ ok: true, status: state.status });
 });
 
 router.post("/restart", (req, res) => {
