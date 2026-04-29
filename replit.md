@@ -60,7 +60,14 @@ All bot configuration is via environment variables. See `artifacts/api-server/RE
 
 Deployable as a single Node web service:
 
-- **On Render**: build with `corepack enable && pnpm install --frozen-lockfile && pnpm --filter @workspace/api-server run build`, start with `node --enable-source-maps --expose-gc artifacts/api-server/dist/index.mjs`.
+- **Docker (local desktop / VPS / Render Docker runtime)**: `cp .env.example .env && docker compose up -d --build`. Multi-stage `Dockerfile` builds with `pnpm deploy --prod`, runs as the non-root `node` user, and includes a healthcheck on `/health`. Compose adds `restart: unless-stopped` and a 512MB memory cap for true 24/7 operation.
+- **Render (Node runtime)**: build with `corepack enable && pnpm install --frozen-lockfile && pnpm --filter @workspace/api-server run build`, start with `node --enable-source-maps --expose-gc artifacts/api-server/dist/index.mjs`.
 - **Keep awake**: point UptimeRobot (5-minute interval, HTTP) at `https://YOUR-APP.onrender.com/health`.
+
+Docker assets at the repo root:
+- `Dockerfile` — multi-stage build
+- `.dockerignore` — keeps node_modules, dist, etc. out of the build context
+- `docker-compose.yml` — one-command local run with healthcheck and auto-restart
+- `.env.example` — template for required env vars
 
 See `artifacts/api-server/README.md` for the step-by-step guide.

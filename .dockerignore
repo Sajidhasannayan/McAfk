@@ -1,0 +1,35 @@
+# Don't ship dev artifacts into the image
+node_modules
+**/node_modules
+**/dist
+**/.cache
+**/.turbo
+**/.next
+**/.expo
+**/.vite
+**/coverage
+
+# VCS / editor / OS
+.git
+.gitignore
+.github
+.vscode
+.idea
+.DS_Store
+
+# Local-only / Replit
+.local
+.replit
+replit.nix
+.replit-artifact
+attached_assets
+*.log
+/tmp
+
+# Other artifacts not needed by the bot
+artifacts/mockup-sandbox/dist
+
+# The Dockerfile itself
+Dockerfile
+.dockerignore
+docker-compose.yml

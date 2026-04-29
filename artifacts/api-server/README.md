@@ -49,6 +49,40 @@ A modern Minecraft AFK bot for free Aternos servers (or any other Minecraft serv
 | `BOT_AUTO_EAT_THRESHOLD`         | `17`        | Eat when food bar drops to this (out of 20)                              |
 | `BOT_AUTO_EAT_PRIORITY`          | `saturation` | `saturation` or `foodPoints` — which stat to maximize when picking food |
 
+## Run with Docker (24/7, locally or anywhere)
+
+The repo ships a multi-stage `Dockerfile` and `docker-compose.yml` at the project root.
+
+### One-command local run
+
+```bash
+cp .env.example .env          # then edit MC_HOST / MC_PORT / MC_USERNAME
+docker compose up -d --build  # builds the image and starts the bot
+```
+
+Open <http://localhost:8080> for the dashboard. The container has `restart: unless-stopped`, an HTTP healthcheck on `/health`, and a 512MB memory cap — so it stays up indefinitely on a desktop, NAS, or VPS.
+
+To stop:
+
+```bash
+docker compose down
+```
+
+To rebuild after a code change:
+
+```bash
+docker compose up -d --build
+```
+
+### Plain Docker (no compose)
+
+```bash
+docker build -t minecraft-afk-bot .
+docker run -d --name afkbot --restart unless-stopped -p 8080:8080 \
+  -e MC_HOST=your.aternos.me -e MC_PORT=12345 -e MC_USERNAME=AFKBot \
+  minecraft-afk-bot
+```
+
 ## Deploy on Render
 
 1. Push this repo to GitHub.
@@ -66,6 +100,8 @@ A modern Minecraft AFK bot for free Aternos servers (or any other Minecraft serv
    - **Instance**: Free is fine.
 4. Add environment variables (at minimum `MC_HOST`, `MC_PORT`, `MC_USERNAME`).
 5. Deploy. Once live, open the Render URL — you'll see the dashboard.
+
+> **Prefer the Dockerfile?** On Render, choose **Runtime: Docker** instead and Render will build straight from the `Dockerfile` at the repo root. No build/start commands needed — just set the env vars.
 
 ## Keep it alive with UptimeRobot
 
