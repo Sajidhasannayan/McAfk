@@ -47,7 +47,7 @@ export function loadBotConfig(): BotConfig {
   return {
     host: overrides.host ?? envStr("MC_HOST", "localhost"),
     port: overrides.port ?? envInt("MC_PORT", 25565),
-    username: overrides.username ?? envStr("MC_USERNAME", "AFKBot"),
+    username: overrides.username ?? envStr("MC_USERNAME", "RanmaRobot"),
     version: envStr("MC_VERSION", "false") === "false" ? false : envStr("MC_VERSION", "1.20.4"),
     auth: envStr("MC_AUTH", "offline") as BotConfig["auth"],
     viewDistance: envStr("MC_VIEW_DISTANCE", "tiny") as BotConfig["viewDistance"],
