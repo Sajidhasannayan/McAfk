@@ -15,15 +15,23 @@ Minecraft AFK bot for free Aternos servers, with a built-in status webpage so it
   - **Periodic chunk pruning** unloads far chunks every 30s (configurable radius).
   - **Memory monitor** samples RSS/heap and triggers manual GC (`--expose-gc`) past a configurable threshold.
 - **Auto-eat**: scans `bot.registry.foods`, equips and consumes the best food (saturation/foodPoints) when food drops below threshold (default 17/20).
-- **Public dashboard** at `/` with prominent online/offline hero (server name + live join uptime), Status tab, and password-gated Chat tab for sending in-game messages and viewing chat. Footer credits "© sajidmogged".
+- **Public dashboard** at `/` with three tabs:
+  - **Status** (public, read-only): online/offline hero, server name, live join uptime, connection / chunks / auto-eat / memory cards. No controls or logs are exposed publicly.
+  - **Chat** (password-gated): send in-game messages and view chat history.
+  - **Admin** (same password): every bot setting (host/port/username/view distance, random chat messages + interval, auto-eat, reconnect delays, anti-AFK & memory thresholds, chunk pruning), plus the live activity log and Start / Stop / Restart controls.
+  - Footer credits "© sajidmogged".
 - **Health endpoint** at `/health` for UptimeRobot.
 
-## Auth & chat
+## Auth, chat & admin
 
-- `POST /chat/login` with `{password}` returns an HMAC-SHA256 signed token (30-day TTL). Default password is `4pkj9!uwoj69ttsajidobhai7!` and can be overridden with `BOT_CHAT_PASSWORD`. Tokens are signed with `SESSION_SECRET`.
+- `POST /chat/login` with `{password}` returns an HMAC-SHA256 signed token (30-day TTL). Default password is `4pkj9!uwoj69ttsajidobhai7!` and can be overridden with `BOT_CHAT_PASSWORD`. Tokens are signed with `SESSION_SECRET`. The same token unlocks both the Chat tab and the Admin tab.
 - `POST /chat/send` (Bearer token) sends a chat message via the bot.
-- `GET /chat/messages` is public and returns the last 200 messages (chat / whisper / system / self).
-- `POST /restart` is now token-protected.
+- `GET /chat/messages` is public and returns the last 200 messages.
+- `GET /admin/config` (Bearer) returns `{effective, overrides}` — the merged config the bot is using and the persisted overrides on disk.
+- `POST /admin/config` (Bearer) accepts a partial `BotConfigOverrides` JSON body, validates ranges (intervals 5s–10min, GC threshold 50–8192 MB, autoEatThreshold 1–20, chatMessages max 50 × 256 chars, username `^[A-Za-z0-9_]{1,16}$`, port 1–65535), persists it to `data/config.json`, and restarts the bot.
+- `POST /admin/config/reset` (Bearer) wipes overrides and restarts.
+- `GET /admin/logs` (Bearer) returns the in-memory ring buffer; the public `/status` no longer includes logs.
+- `POST /start`, `POST /stop`, `POST /restart` are all Bearer-protected.
 
 ## Project structure
 

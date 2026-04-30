@@ -129,17 +129,35 @@
       .power.off { opacity: 0.6; }
       .power:disabled { cursor: not-allowed; opacity: 0.5; }
 
-      .settings-grid { display: grid; gap: 12px; grid-template-columns: 2fr 1fr 1fr; margin-bottom: 12px; }
-      .settings-grid label { display: flex; flex-direction: column; gap: 4px; }
-      .settings-grid label span { font-size: 12px; color: var(--muted); }
-      .settings-grid input { background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
-        border-radius: 8px; padding: 9px 11px; font-size: 14px; font-family: inherit; }
-      .settings-grid input:focus { outline: none; border-color: var(--accent); }
-      .settings-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+      .settings-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
       .cfg-msg { font-size: 13px; color: var(--muted); }
       .cfg-msg.ok { color: var(--accent); }
       .cfg-msg.err { color: var(--error); }
-      @media (max-width: 640px) { .settings-grid { grid-template-columns: 1fr; } }
+      .cfg-hint { margin: 0 0 10px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+
+      .status-hint { color: var(--muted); font-size: 13px; margin: 22px 0 0;
+        padding: 12px 14px; border: 1px dashed var(--border); border-radius: 10px; }
+      .status-hint a { color: var(--info); text-decoration: none; font-weight: 500; }
+      .status-hint a:hover { text-decoration: underline; }
+
+      /* Admin form */
+      .admin-form { display: flex; flex-direction: column; gap: 14px; }
+      .admin-form fieldset.card { border: 1px solid var(--border); padding: 14px 16px 16px; }
+      .admin-form legend { padding: 0 6px; font-size: 12px; font-weight: 600; color: var(--muted);
+        text-transform: uppercase; letter-spacing: 0.08em; }
+      .grid-2 { display: grid; gap: 12px 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+      .fld { display: flex; flex-direction: column; gap: 5px; }
+      .fld > span { font-size: 12px; color: var(--muted); line-height: 1.4; }
+      .fld input[type="text"], .fld input[type="number"], .fld input[type="password"],
+      .fld select, .fld textarea {
+        background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+        border-radius: 8px; padding: 9px 11px; font-size: 14px; font-family: inherit;
+      }
+      .fld textarea { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; resize: vertical; min-height: 110px; }
+      .fld input:focus, .fld select:focus, .fld textarea:focus { outline: none; border-color: var(--accent); }
+      .fld.inline { flex-direction: row; align-items: center; gap: 10px; padding-top: 22px; }
+      .fld.inline > span { font-size: 14px; color: var(--text); }
+      .fld.inline input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
 
       button.primary { background: var(--accent); color: #0b1110; border: none;
         padding: 11px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
@@ -190,6 +208,7 @@
       <div class="tabs" role="tablist">
         <button class="tab active" data-tab="status" role="tab">Status</button>
         <button class="tab" data-tab="chat" role="tab">Chat</button>
+        <button class="tab" data-tab="admin" role="tab">Admin</button>
       </div>
 
       <!-- STATUS PANE -->
@@ -240,46 +259,10 @@
           </div>
         </div>
 
-        <div id="settings-card" class="card" style="margin-top:16px; display:none;">
-          <h2>Server settings</h2>
-          <p style="margin:0 0 12px; color:var(--muted); font-size:13px;">
-            Saved to disk and used immediately. Overrides any <code>MC_HOST</code> / <code>MC_PORT</code> /
-            <code>MC_USERNAME</code> env vars, so you can deploy without setting any.
-          </p>
-          <div class="settings-grid">
-            <label><span>Host</span>
-              <input id="cfg-host" type="text" placeholder="example.aternos.me" autocomplete="off" />
-            </label>
-            <label><span>Port</span>
-              <input id="cfg-port" type="number" min="1" max="65535" placeholder="25565" />
-            </label>
-            <label><span>Username</span>
-              <input id="cfg-username" type="text" maxlength="16" placeholder="AFKBot" autocomplete="off" />
-            </label>
-          </div>
-          <div class="settings-actions">
-            <span class="cfg-msg" id="cfg-msg"></span>
-            <button class="primary" id="cfg-save">Save & reconnect</button>
-          </div>
-        </div>
-
-        <div id="settings-locked" class="card" style="margin-top:16px;">
-          <h2>Server settings</h2>
-          <p style="margin:0; color:var(--muted); font-size:13px;">
-            Sign in on the Chat tab to change the host, port, and username from here.
-          </p>
-        </div>
-
-        <div class="toolbar">
-          <h2 class="section-title" style="margin:24px 0 10px;">Recent activity</h2>
-          <div class="bot-controls">
-            <button class="power off" id="bot-power" title="Sign in on the Chat tab to use">
-              <span class="dot"></span><span class="lbl">…</span>
-            </button>
-            <button class="ghost" id="bot-restart" title="Restart with the latest config">Restart</button>
-          </div>
-        </div>
-        <div class="logs" id="logs"></div>
+        <p class="status-hint">
+          Bot configuration, controls, and activity logs live on the
+          <a href="#" id="goto-admin">Admin</a> tab.
+        </p>
       </div>
 
       <!-- CHAT PANE -->
@@ -326,6 +309,143 @@
         </div>
       </div>
 
+      <!-- ADMIN PANE -->
+      <div class="pane" id="pane-admin">
+        <div id="admin-login">
+          <div class="login-card">
+            <h3>Admin sign in</h3>
+            <p>Enter the bot password to manage settings, view logs, and start/stop the bot. Same password as the Chat tab.</p>
+            <div class="field">
+              <label for="admin-pw">Password</label>
+              <input id="admin-pw" type="password" autocomplete="current-password" placeholder="••••••••" />
+            </div>
+            <div class="err" id="admin-login-err"></div>
+            <div class="actions">
+              <span class="hint">Token stays in this browser only.</span>
+              <button class="primary" id="admin-login-btn">Sign in</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="admin-app" style="display:none;">
+          <div class="toolbar">
+            <span class="you">Signed in as admin</span>
+            <div class="bot-controls">
+              <button class="power off" id="bot-power" title="Start or stop the bot">
+                <span class="dot"></span><span class="lbl">…</span>
+              </button>
+              <button class="ghost" id="bot-restart" title="Restart with the latest config">Restart</button>
+              <button class="ghost" id="admin-logout">Sign out</button>
+            </div>
+          </div>
+
+          <form id="admin-form" class="admin-form">
+            <fieldset class="card">
+              <legend>Server connection</legend>
+              <div class="grid-2">
+                <label class="fld"><span>Host</span>
+                  <input name="host" type="text" placeholder="example.aternos.me" autocomplete="off" />
+                </label>
+                <label class="fld"><span>Port</span>
+                  <input name="port" type="number" min="1" max="65535" placeholder="25565" />
+                </label>
+                <label class="fld"><span>Username</span>
+                  <input name="username" type="text" maxlength="16" placeholder="RanmaRobot" autocomplete="off" />
+                </label>
+                <label class="fld"><span>View distance</span>
+                  <select name="viewDistance">
+                    <option value="tiny">tiny (lightest)</option>
+                    <option value="short">short</option>
+                    <option value="normal">normal</option>
+                    <option value="far">far (heaviest)</option>
+                  </select>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="card">
+              <legend>Random in-game chat</legend>
+              <p class="cfg-hint">One message per line. The bot rotates through them at the interval below. Leave blank to disable.</p>
+              <label class="fld"><span>Messages (one per line, max 50, 256 chars each)</span>
+                <textarea name="chatMessages" rows="6" placeholder="Hi everyone!&#10;Just keeping the server warm."></textarea>
+              </label>
+              <label class="fld"><span>Interval between messages (ms)</span>
+                <input name="chatIntervalMs" type="number" min="5000" max="3600000" step="1000" />
+              </label>
+            </fieldset>
+
+            <fieldset class="card">
+              <legend>Auto-eat</legend>
+              <div class="grid-2">
+                <label class="fld inline">
+                  <input name="autoEatEnabled" type="checkbox" />
+                  <span>Enabled</span>
+                </label>
+                <label class="fld"><span>Hunger threshold (1–20). Eats when food drops below this.</span>
+                  <input name="autoEatThreshold" type="number" min="1" max="20" />
+                </label>
+                <label class="fld"><span>Priority</span>
+                  <select name="autoEatPriority">
+                    <option value="saturation">saturation (longer-lasting)</option>
+                    <option value="foodPoints">foodPoints (refills more)</option>
+                  </select>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="card">
+              <legend>Reconnect</legend>
+              <div class="grid-2">
+                <label class="fld"><span>Min delay (ms)</span>
+                  <input name="reconnectMinMs" type="number" min="1000" max="600000" step="500" />
+                </label>
+                <label class="fld"><span>Max delay (ms)</span>
+                  <input name="reconnectMaxMs" type="number" min="1000" max="3600000" step="500" />
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="card">
+              <legend>Anti-AFK & memory</legend>
+              <div class="grid-2">
+                <label class="fld"><span>Anti-AFK tick interval (ms)</span>
+                  <input name="antiAfkIntervalMs" type="number" min="5000" max="600000" step="1000" />
+                </label>
+                <label class="fld"><span>Memory report interval (ms)</span>
+                  <input name="memoryReportIntervalMs" type="number" min="5000" max="600000" step="1000" />
+                </label>
+                <label class="fld"><span>Force GC above (MB) — needs --expose-gc</span>
+                  <input name="memoryGcThresholdMb" type="number" min="50" max="8192" step="10" />
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="card">
+              <legend>Chunk pruning</legend>
+              <div class="grid-2">
+                <label class="fld"><span>Prune interval (ms)</span>
+                  <input name="chunkPruneIntervalMs" type="number" min="5000" max="600000" step="1000" />
+                </label>
+                <label class="fld"><span>Keep radius (chunks)</span>
+                  <input name="chunkPruneRadius" type="number" min="1" max="16" />
+                </label>
+              </div>
+            </fieldset>
+
+            <div class="settings-actions">
+              <span class="cfg-msg" id="admin-cfg-msg"></span>
+              <div style="display:flex; gap:8px;">
+                <button type="button" class="ghost" id="admin-reset">Reset to defaults</button>
+                <button type="submit" class="primary" id="admin-save">Save & restart bot</button>
+              </div>
+            </div>
+          </form>
+
+          <h2 class="section-title" style="margin:24px 0 10px;">Activity log</h2>
+          <div class="logs" id="logs"></div>
+        </div>
+      </div>
+
       <footer>
         <div>© <span id="year"></span> sajidmogged. All rights reserved.</div>
         <div>
@@ -339,6 +459,8 @@
       const TOKEN_KEY = "afkbot_chat_token";
       function getToken() { return localStorage.getItem(TOKEN_KEY); }
       function setToken(t) { if (t) localStorage.setItem(TOKEN_KEY, t); else localStorage.removeItem(TOKEN_KEY); }
+      function authHeader() { const t = getToken(); return t ? { "Authorization": "Bearer " + t } : {}; }
+      let activeTab = "status";
 
       function fmtDuration(ms) {
         if (!ms || ms < 0) return "—";
@@ -363,12 +485,18 @@
 
       // Tabs
       const tabs = document.querySelectorAll(".tab");
-      tabs.forEach(t => t.addEventListener("click", () => {
-        tabs.forEach(x => x.classList.toggle("active", x === t));
+      function activateTab(name) {
+        activeTab = name;
+        tabs.forEach(x => x.classList.toggle("active", x.dataset.tab === name));
         document.querySelectorAll(".pane").forEach(p =>
-          p.classList.toggle("active", p.id === "pane-" + t.dataset.tab));
-        if (t.dataset.tab === "chat") refreshChat();
-      }));
+          p.classList.toggle("active", p.id === "pane-" + name));
+        if (name === "chat") refreshChat();
+        if (name === "admin") { loadAdminConfig(); refreshAdminLogs(); }
+      }
+      tabs.forEach(t => t.addEventListener("click", () => activateTab(t.dataset.tab)));
+      document.getElementById("goto-admin").addEventListener("click", (e) => {
+        e.preventDefault(); activateTab("admin");
+      });
 
       // Status
       async function refreshStatus() {
@@ -421,19 +549,30 @@
           document.getElementById("heapbar").style.width = pct + "%";
           setText("external", `${s.memory.externalMb} MB`);
           setText("gc", `${s.memory.gcRuns}${s.memory.lastGcAt ? ` (last ${fmtTime(s.memory.lastGcAt)})` : ""}`);
+        } catch (e) {
+          setText("hero-status", "Unreachable");
+        }
+      }
 
+      // Admin: activity log feed
+      async function refreshAdminLogs() {
+        if (!getToken()) return;
+        try {
+          const r = await fetch("/admin/logs", { cache: "no-store", headers: authHeader() });
+          if (r.status === 401) { setToken(null); applyAuthState(); return; }
+          if (!r.ok) return;
+          const j = await r.json();
           const logsEl = document.getElementById("logs");
+          if (!logsEl) return;
           logsEl.innerHTML = "";
-          for (const l of s.logs.slice().reverse()) {
+          for (const l of (j.logs || []).slice().reverse()) {
             const t = new Date(l.ts).toLocaleTimeString();
             const div = document.createElement("div");
             div.className = "logline";
             div.innerHTML = `<span class="ts">${t}</span><span class="lv ${l.level}">${l.level.toUpperCase()}</span><span>${escapeHtml(l.message)}</span>`;
             logsEl.appendChild(div);
           }
-        } catch (e) {
-          setText("hero-status", "Unreachable");
-        }
+        } catch {}
       }
 
       // Chat
@@ -472,61 +611,134 @@
         document.getElementById("chat-login").style.display = loggedIn ? "none" : "block";
         document.getElementById("chat-app").style.display = loggedIn ? "block" : "none";
         document.getElementById("chat-readonly").style.display = loggedIn ? "none" : "block";
-        document.getElementById("settings-card").style.display = loggedIn ? "block" : "none";
-        document.getElementById("settings-locked").style.display = loggedIn ? "none" : "block";
-        if (loggedIn) loadConfig();
+        document.getElementById("admin-login").style.display = loggedIn ? "none" : "block";
+        document.getElementById("admin-app").style.display = loggedIn ? "block" : "none";
+        if (loggedIn && activeTab === "admin") {
+          loadAdminConfig();
+          refreshAdminLogs();
+        }
       }
 
-      async function loadConfig() {
-        try {
-          const r = await fetch("/config", { cache: "no-store" });
-          const j = await r.json();
-          const h = document.getElementById("cfg-host");
-          const p = document.getElementById("cfg-port");
-          const u = document.getElementById("cfg-username");
-          if (!h.dataset.dirty) h.value = j.host || "";
-          if (!p.dataset.dirty) p.value = j.port || "";
-          if (!u.dataset.dirty) u.value = j.username || "";
-        } catch {}
+      // Admin config form
+      const ADMIN_FIELDS = [
+        "host","port","username","viewDistance",
+        "chatMessages","chatIntervalMs",
+        "reconnectMinMs","reconnectMaxMs",
+        "chunkPruneIntervalMs","chunkPruneRadius",
+        "memoryReportIntervalMs","memoryGcThresholdMb","antiAfkIntervalMs",
+        "autoEatEnabled","autoEatThreshold","autoEatPriority",
+      ];
+      function adminInput(name) {
+        return document.querySelector(`#admin-form [name="${name}"]`);
       }
-      ["cfg-host","cfg-port","cfg-username"].forEach(id => {
-        document.getElementById(id).addEventListener("input", e => { e.target.dataset.dirty = "1"; });
+      // Track which fields the user is editing so live reloads don't clobber typing
+      ADMIN_FIELDS.forEach(name => {
+        const el = adminInput(name);
+        if (!el) return;
+        const evt = (el.type === "checkbox" || el.tagName === "SELECT") ? "change" : "input";
+        el.addEventListener(evt, () => { el.dataset.dirty = "1"; });
       });
 
-      document.getElementById("cfg-save").addEventListener("click", async () => {
-        const msg = document.getElementById("cfg-msg");
-        msg.className = "cfg-msg"; msg.textContent = "Saving…";
-        const body = {
-          host: document.getElementById("cfg-host").value.trim(),
-          port: Number(document.getElementById("cfg-port").value),
-          username: document.getElementById("cfg-username").value.trim(),
-        };
+      function setFieldValue(name, value) {
+        const el = adminInput(name);
+        if (!el || el.dataset.dirty) return;
+        if (name === "chatMessages") {
+          el.value = Array.isArray(value) ? value.join("\n") : "";
+        } else if (el.type === "checkbox") {
+          el.checked = !!value;
+        } else if (el.type === "number") {
+          el.value = value == null ? "" : String(value);
+        } else {
+          el.value = value == null ? "" : String(value);
+        }
+      }
+
+      async function loadAdminConfig() {
+        if (!getToken()) return;
         try {
-          const r = await fetch("/config", {
+          const r = await fetch("/admin/config", { cache: "no-store", headers: authHeader() });
+          if (r.status === 401) { setToken(null); applyAuthState(); return; }
+          if (!r.ok) return;
+          const j = await r.json();
+          const cfg = j.effective || {};
+          ADMIN_FIELDS.forEach(name => setFieldValue(name, cfg[name]));
+        } catch {}
+      }
+
+      function readAdminForm() {
+        const out = {};
+        ADMIN_FIELDS.forEach(name => {
+          const el = adminInput(name);
+          if (!el) return;
+          if (name === "chatMessages") {
+            out.chatMessages = el.value.split("\n").map(s => s.trim()).filter(Boolean);
+          } else if (el.type === "checkbox") {
+            out[name] = el.checked;
+          } else if (el.type === "number") {
+            const n = Number(el.value);
+            if (Number.isFinite(n)) out[name] = n;
+          } else {
+            const v = el.value.trim();
+            if (v) out[name] = v;
+          }
+        });
+        return out;
+      }
+
+      function clearAdminDirty() {
+        ADMIN_FIELDS.forEach(name => {
+          const el = adminInput(name);
+          if (el) delete el.dataset.dirty;
+        });
+      }
+
+      document.getElementById("admin-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const msg = document.getElementById("admin-cfg-msg");
+        const btn = document.getElementById("admin-save");
+        msg.className = "cfg-msg"; msg.textContent = "Saving…"; btn.disabled = true;
+        try {
+          const r = await fetch("/admin/config", {
             method: "POST",
-            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() },
-            body: JSON.stringify(body),
+            headers: { "Content-Type": "application/json", ...authHeader() },
+            body: JSON.stringify(readAdminForm()),
           });
           if (r.status === 401) { setToken(null); applyAuthState(); return; }
           const j = await r.json().catch(() => ({}));
           if (!r.ok) { msg.className = "cfg-msg err"; msg.textContent = j.error || "Failed to save"; return; }
-          msg.className = "cfg-msg ok"; msg.textContent = "Saved — bot is reconnecting…";
-          ["cfg-host","cfg-port","cfg-username"].forEach(id => delete document.getElementById(id).dataset.dirty);
-          setTimeout(() => { msg.textContent = ""; refreshStatus(); }, 1500);
-        } catch (e) {
+          msg.className = "cfg-msg ok"; msg.textContent = "Saved — bot is restarting with new settings…";
+          clearAdminDirty();
+          setTimeout(() => { msg.textContent = ""; loadAdminConfig(); refreshStatus(); refreshAdminLogs(); }, 1500);
+        } catch {
+          msg.className = "cfg-msg err"; msg.textContent = "Network error";
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      document.getElementById("admin-reset").addEventListener("click", async () => {
+        if (!confirm("Reset every setting back to defaults? The bot will restart.")) return;
+        const msg = document.getElementById("admin-cfg-msg");
+        msg.className = "cfg-msg"; msg.textContent = "Resetting…";
+        try {
+          const r = await fetch("/admin/config/reset", { method: "POST", headers: authHeader() });
+          if (r.status === 401) { setToken(null); applyAuthState(); return; }
+          if (!r.ok) { msg.className = "cfg-msg err"; msg.textContent = "Failed to reset"; return; }
+          msg.className = "cfg-msg ok"; msg.textContent = "Reset — reloading…";
+          clearAdminDirty();
+          setTimeout(() => { msg.textContent = ""; loadAdminConfig(); refreshStatus(); }, 1200);
+        } catch {
           msg.className = "cfg-msg err"; msg.textContent = "Network error";
         }
       });
 
-      document.getElementById("login-btn").addEventListener("click", async () => {
-        const pw = document.getElementById("pw").value;
-        const errEl = document.getElementById("login-err");
+      async function doLogin(password, errEl, pwField) {
         errEl.textContent = "";
         try {
           const r = await fetch("/chat/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ password: pw }),
+            body: JSON.stringify({ password }),
           });
           if (!r.ok) {
             const j = await r.json().catch(() => ({}));
@@ -535,21 +747,37 @@
           }
           const j = await r.json();
           setToken(j.token);
-          document.getElementById("pw").value = "";
+          if (pwField) pwField.value = "";
           applyAuthState();
           refreshChat();
         } catch {
           errEl.textContent = "Network error";
         }
-      });
+      }
 
+      document.getElementById("login-btn").addEventListener("click", () => {
+        doLogin(document.getElementById("pw").value,
+          document.getElementById("login-err"),
+          document.getElementById("pw"));
+      });
       document.getElementById("pw").addEventListener("keydown", (e) => {
         if (e.key === "Enter") document.getElementById("login-btn").click();
       });
 
-      document.getElementById("logout-btn").addEventListener("click", () => {
-        setToken(null); applyAuthState(); refreshChat();
+      document.getElementById("admin-login-btn").addEventListener("click", () => {
+        doLogin(document.getElementById("admin-pw").value,
+          document.getElementById("admin-login-err"),
+          document.getElementById("admin-pw"));
       });
+      document.getElementById("admin-pw").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") document.getElementById("admin-login-btn").click();
+      });
+
+      function logoutEverywhere() {
+        setToken(null); clearAdminDirty(); applyAuthState(); refreshChat();
+      }
+      document.getElementById("logout-btn").addEventListener("click", logoutEverywhere);
+      document.getElementById("admin-logout").addEventListener("click", logoutEverywhere);
 
       document.getElementById("composer").addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -580,46 +808,42 @@
         }
       });
 
+      let lastBotStatus = "idle";
       function updatePowerButton(status) {
+        lastBotStatus = status;
         const btn = document.getElementById("bot-power");
+        if (!btn) return;
         const lbl = btn.querySelector(".lbl");
         const restart = document.getElementById("bot-restart");
-        const loggedIn = !!getToken();
         const isStopped = status === "stopped";
         btn.classList.remove("run", "stop", "off");
-        if (!loggedIn) {
-          btn.classList.add("off");
-          lbl.textContent = isStopped ? "Stopped" : "Running";
-          btn.disabled = true;
-          restart.disabled = true;
-          btn.title = "Sign in on the Chat tab to use";
-          restart.title = "Sign in on the Chat tab to use";
-        } else if (isStopped) {
+        if (isStopped) {
           btn.classList.add("run");
           lbl.textContent = "Start";
           btn.disabled = false;
-          restart.disabled = true;
+          if (restart) restart.disabled = true;
           btn.title = "Start the bot";
         } else {
           btn.classList.add("stop");
-          lbl.textContent = "Stop";
+          lbl.textContent = status === "online" ? "Stop"
+            : status === "connecting" ? "Connecting…"
+            : status === "reconnecting" ? "Stop (reconnecting)"
+            : "Stop";
           btn.disabled = false;
-          restart.disabled = false;
+          if (restart) { restart.disabled = false; restart.title = "Restart with the latest config"; }
           btn.title = "Stop the bot";
-          restart.title = "Restart with the latest config";
         }
       }
 
       async function powerAction(path) {
         const token = getToken();
-        if (!token) { alert("Sign in on the Chat tab first."); return; }
-        const r = await fetch(path, { method: "POST", headers: { "Authorization": "Bearer " + token } });
-        if (r.status === 401) { setToken(null); applyAuthState(); alert("Session expired — sign in again."); return; }
-        setTimeout(refreshStatus, 600);
+        if (!token) return;
+        const r = await fetch(path, { method: "POST", headers: authHeader() });
+        if (r.status === 401) { setToken(null); applyAuthState(); return; }
+        setTimeout(() => { refreshStatus(); refreshAdminLogs(); }, 600);
       }
       document.getElementById("bot-power").addEventListener("click", () => {
-        const isStopped = document.getElementById("hero-status").textContent.toLowerCase().startsWith("stopped");
-        powerAction(isStopped ? "/start" : "/stop");
+        powerAction(lastBotStatus === "stopped" ? "/start" : "/stop");
       });
       document.getElementById("bot-restart").addEventListener("click", () => powerAction("/restart"));
 
@@ -630,6 +854,7 @@
       refreshChat();
       setInterval(refreshStatus, 3000);
       setInterval(refreshChat, 3000);
+      setInterval(() => { if (activeTab === "admin") refreshAdminLogs(); }, 3000);
     </script>
   </body>
 </html>
